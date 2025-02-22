@@ -3,20 +3,21 @@
 import {createContext, ReactNode, useCallback, useContext, useMemo, useReducer} from "react";
 import {Ethernet, Log} from "@/lib/types";
 
-type CodeAction =
+type EthernetAction =
   | { type: 'INTERFACES', payload: { interfaces: Ethernet[] } }
-  | { type: 'LOGS', payload: { alert: Log } }
+  | { type: 'LOGS', payload: { logs: Log } }
 
-export type Code = { interfaces: Ethernet[], logs: Log[] }
+export type Route = { interfaces: Ethernet[], logs: Log[] }
+
 type CodeContextType = {
-  code: Code | undefined,
+  route: Route | undefined,
   interfaces: (interfaces: Ethernet[]) => void,
   logs: (alert: Log) => void
 }
 
-export const CodeContext = createContext<CodeContextType | undefined>(undefined)
+export const EthernetContext = createContext<CodeContextType | undefined>(undefined)
 
-function reducer(code: Code | undefined, action: CodeAction): Code {
+function reducer(code: Route | undefined, action: EthernetAction): Route {
   const current = code || initialState
 
   switch (action.type) {
@@ -25,15 +26,15 @@ function reducer(code: Code | undefined, action: CodeAction): Code {
       return {...current, interfaces: [...interfaces]}
     }
     case 'LOGS':
-      const {alert} = action.payload
-      return {...current, logs: [...current.logs, alert]}
+      const {logs} = action.payload
+      return {...current, logs: [...current.logs, logs]}
     default:
       return current
   }
 }
 
-export const initialState: Code = {
-  interfaces: Array.from({length: 11}, (_, i) => ({
+export const initialState: Route = {
+  interfaces: Array.from({length: 10}, (_, i) => ({
     name: `ether${i + 1}`,
     address: '',
     gateway: '',
@@ -44,7 +45,7 @@ export const initialState: Code = {
   logs: []
 }
 
-export default function CodeProvider({children}: { children: ReactNode }) {
+export default function EthernetProvider({children}: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const interfaces = useCallback((interfaces: Ethernet[]) => {
@@ -52,24 +53,24 @@ export default function CodeProvider({children}: { children: ReactNode }) {
   }, [])
 
   const logs = useCallback((logs: Log) => {
-    dispatch({type: 'LOGS', payload: {alert: logs}})
+    dispatch({type: 'LOGS', payload: {logs: logs}})
   }, [])
 
   const value = useMemo(() => ({
-    code: state,
+    route: state,
     interfaces,
     logs
   }), [state])
 
   return (
-    <CodeContext.Provider value={value}>
+    <EthernetContext.Provider value={value}>
       {children}
-    </CodeContext.Provider>
+    </EthernetContext.Provider>
   )
 }
 
-export function useCode() {
-  const context = useContext(CodeContext)
+export function useEthernet() {
+  const context = useContext(EthernetContext)
 
   if (context === undefined) {
     throw new Error('useCode must be used within a CodeProvider')

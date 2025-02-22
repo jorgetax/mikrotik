@@ -4,6 +4,7 @@ export enum Mikrotik {
   INTERFACE_LIST_MEMBER = 'interface list member',
   INTERFACE_BRIDGE = 'interface bridge',
   INTERFACE_BRIDGE_PORT = 'interface bridge port',
+  ROUTING_TABLE = 'routing table',
   IP = 'ip',
   IP_DNS = 'ip dns',
   IP_ADDRESS = 'ip address',
@@ -26,16 +27,12 @@ export enum Method {
   REMOVE = 'remove',
 }
 
-export type Address = string
-export type Gateway = string
-export type Log = { command: string, response: string }
-export type Command = { mikrotik: Mikrotik, method: Method, params: Record<string, string> }
+export type Log = { message: string }
 
 export interface Ethernet {
   name: string
-  address: Address
-  gateway: Gateway
-  command: Command[]
+  address: string
+  gateway: string
   wan: boolean
   bridge: boolean
   pcc: boolean

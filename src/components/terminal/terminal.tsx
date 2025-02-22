@@ -4,15 +4,26 @@ import {useEthernet} from "@/context/ethernet-context";
 import TerminalIcon from "@/components/icon/terminal-icon";
 import {useEffect, useRef} from "react";
 
-export default function Code() {
+export default function Terminal() {
   const {route} = useEthernet()
   const preRef = useRef<HTMLPreElement>(null);
+
+  const logs = route && route.logs.map((log, i) => log.message).join('\n')
 
   useEffect(() => {
     if (preRef.current) {
       preRef.current.scrollTop = preRef.current.scrollHeight;
     }
   }, [route?.logs]);
+
+  const highlight = (code: string) => {
+    // html use counter-increment: line; counter-reset: line 0; to number lines
+    const lines = code.split('\n')
+
+    return lines.map((line, index) => (
+      <span key={index} className={styles.line} dangerouslySetInnerHTML={{__html: line}}></span>
+    ))
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -25,9 +36,7 @@ export default function Code() {
       </div>
       <pre className={styles.pre} ref={preRef}>
         <code className={styles.code}>
-          {route?.logs.map((log, index) => (
-            <span key={index} className={styles.line}>{log.time} {log.command} {log.response}</span>
-          ))}
+          {logs && highlight(logs)}
         </code>
       </pre>
     </div>
